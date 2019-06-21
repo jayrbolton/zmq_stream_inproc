@@ -9,7 +9,7 @@ def main():
     backend_url = f'inproc://backend'
     # frontend_url = f'ipc:///tmp/frontend'
     # backend_url = f'ipc:///tmp/backend'
-    streamer = zmq.devices.ProcessDevice(zmq.STREAMER, zmq.PULL, zmq.PUSH)
+    streamer = zmq.devices.ThreadDevice(zmq.STREAMER, zmq.PULL, zmq.PUSH)
     streamer.bind_in(frontend_url)
     streamer.bind_out(backend_url)
     streamer.setsockopt_in(zmq.IDENTITY, b'PULL')
@@ -25,9 +25,8 @@ def main():
     for t in threads:
         t.daemon = True
         t.start()
+        # print(t)
     while True:
-        for t in threads:
-            print(t)
         time.sleep(5)
 
 
@@ -36,7 +35,7 @@ def pusher(sock_url, tid):
     sock = context.socket(zmq.PUSH)
     sock.connect(sock_url)
     while True:
-        print(f'Pusher {tid} pushing..')
+        # print(f'Pusher {tid} pushing..')
         sock.send_json({'sup': 'nerds'})
         time.sleep(1)
 
